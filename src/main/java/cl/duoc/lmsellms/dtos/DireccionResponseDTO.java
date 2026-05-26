@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 public class DireccionResponseDTO {
 
     private Long id;
+    private Long clienteId;
     private Integer numero;
     private Integer nroDepto;
     private String calle;

@@ -1,9 +1,6 @@
 package cl.duoc.lmsellms.controllers;
 
-import cl.duoc.lmsellms.dtos.VentaInputDTO;
-import cl.duoc.lmsellms.dtos.VentaResponseDTO;
-import cl.duoc.lmsellms.dtos.VentaUpdateDTO;
-import cl.duoc.lmsellms.dtos.VentaUpdateOnCloseDTO;
+import cl.duoc.lmsellms.dtos.*;
 import cl.duoc.lmsellms.services.VentaService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -75,6 +72,20 @@ public class VentaRESTController {
         String logMsg = "Solicitud para buscar venta por ID: " + id + ".";
         logger.info(logMsgRequest);
         VentaResponseDTO dto = ventaService.findById(id);
+        if (dto != null){
+            logger.info(logMsg + "=> encontrado.");
+            return ResponseEntity.ok(dto);
+        }
+        logger.info(logMsg + "=> no encontrado.");
+        return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/-by-id-for-payment/{id}")
+    public ResponseEntity<VentaResponseForPaymentDTO> findByIdForPayment(@PathVariable Long id){
+        String logMsgRequest = "Recibiendo solicitud para buscar venta por ID: " + id + ".";
+        String logMsg = "Solicitud para buscar venta por ID: " + id + ".";
+        logger.info(logMsgRequest);
+        VentaResponseForPaymentDTO dto = ventaService.findByIdForPayment(id);
         if (dto != null){
             logger.info(logMsg + "=> encontrado.");
             return ResponseEntity.ok(dto);

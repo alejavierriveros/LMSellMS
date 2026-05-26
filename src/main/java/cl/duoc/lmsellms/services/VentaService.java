@@ -5,6 +5,7 @@ import cl.duoc.lmsellms.clients.ToAPICustomerFeign;
 import cl.duoc.lmsellms.controllers.DescuentoRESTController;
 import cl.duoc.lmsellms.dtos.*;
 import cl.duoc.lmsellms.exceptions.FailedAPICallResponseExeption;
+import cl.duoc.lmsellms.exceptions.IdExisteException;
 import cl.duoc.lmsellms.exceptions.IdNoExisteException;
 import cl.duoc.lmsellms.exceptions.NombreDctoNoExisteException;
 import cl.duoc.lmsellms.mapper.*;
@@ -45,13 +46,15 @@ public class VentaService {
     private ToAPICustomerFeign toAPICustomerFeign;
     @Autowired
     private DescuentoRepository descuentoRepository;
+    @Autowired
+    private VentaResponseForPaymentMapper ventaResponseForPaymentMapper;
 
 
     //CREATE:
     @Transactional
     public VentaResponseDTO save(VentaInputDTO dto) {
         if (ventaRepository.existsByCarritoId((dto.getCarritoId()))) {
-            throw new NombreDctoNoExisteException("ID de carrito ya existe para el cliente.");
+            throw new IdExisteException("ID de carrito ya existe para el cliente.");
         }
         CarritoOrderResponseDTO carrito = null;
         try {
@@ -126,6 +129,11 @@ public class VentaService {
     }
 
     @Transactional(readOnly = true)
+    public VentaResponseForPaymentDTO findByIdForPayment(Long id) {
+        return ventaResponseForPaymentMapper.toDto(ventaRepository.findById(id).orElseThrow(() -> new IdNoExisteException("ID de venta no existe.")));
+    }
+
+    @Transactional(readOnly = true)
     public List<VentaResponseDTO> findAllByClienteId(Long id) {
         return ventaRepository.findAllByClienteId(id).stream().map(ventaResponseMapper::toDto).toList();
     }
@@ -146,13 +154,18 @@ public class VentaService {
     @Transactional
     public VentaResponseDTO update(VentaUpdateDTO dto) {
         //Agregar los mismos validadores de .save"
-        //TODO: Se debe arregllar: expone a la entidad Venta directamente en Service cuando se podría procesar en el mapper.
+
         Venta ent = ventaRepository.findById(dto.getId()).orElseThrow(() -> new IdNoExisteException("ID de venta no existe."));
 
         //Obtener desde API REST.
         DireccionResponseDTO direccion = null;
         try {
             direccion = toAPICustomerFeign.findDireccionById(dto.getDireccionId());
+            if (direccion.getClienteId() != ent.getClienteId()) {
+                String responseMessage = "ID de dirección no corresponde a ID Cliente";
+                logger.info(responseMessage);
+                throw new IdNoExisteException(responseMessage);
+            }
         } catch (FeignException.NotFound e) {
             String responseMessage = "ID de Dirección no existe." + e.getMessage();
             logger.info(responseMessage);
@@ -166,8 +179,10 @@ public class VentaService {
         //Obtener desde LocalPackage:
 
         if (!descuentoRepository.existsById(dto.getDescuentoId())) {
-            logger.info("Descuento con ID" + dto.getDescuentoId().toString() + "no encontrado");
-            throw new IdNoExisteException("Descuento con ID" + dto.getDescuentoId().toString() + "no encontrado");
+            String responseMessage = "Descuento con ID: " + dto.getDescuentoId().toString() + " no encontrado.";
+            logger.info(responseMessage);
+            throw new IdNoExisteException(responseMessage);
+
         }
 
         Descuento descuento = descuentoRepository.findById(dto.getDescuentoId()).orElseThrow(() ->new IdNoExisteException("Descuento con ID" + dto.getDescuentoId().toString() + "no encontrado"));
