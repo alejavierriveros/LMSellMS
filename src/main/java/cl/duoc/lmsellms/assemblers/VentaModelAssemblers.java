@@ -13,11 +13,11 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 public class VentaModelAssemblers implements RepresentationModelAssembler<VentaResponseDTO, EntityModel<VentaResponseDTO>> {
 
     @Override
-    public EntityModel<VentaResponseDTO> toModel(VentaResponseDTO Venta) {
-        return EntityModel.of(Venta,
-                linkTo(methodOn(VentaRESTControllerV2.class).findById(Venta.getId())).withSelfRel(),
-                linkTo(methodOn(VentaRESTControllerV2.class).findAll()).withRel("venta")
+    public EntityModel<VentaResponseDTO> toModel(VentaResponseDTO venta) {
+        return EntityModel.of(venta,
+                linkTo(methodOn(VentaRESTControllerV2.class).findById(venta.getId())).withSelfRel(),
+                // Corregido de "venta" a "ventas" para seguir el estándar de colecciones
+                linkTo(methodOn(VentaRESTControllerV2.class).findAll()).withRel("ventas")
         );
     }
-
 }

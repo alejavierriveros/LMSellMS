@@ -36,7 +36,7 @@ import jakarta.validation.Valid;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 @RestController
-@RequestMapping("/api/v1/descuentos")
+@RequestMapping("/api/v2/descuentos")
 @Tag(name = "Descuento", description = "Gestión de descuentos")
 public class DescuentoRESTControllerV2 {
 

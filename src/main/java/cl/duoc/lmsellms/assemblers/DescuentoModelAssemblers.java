@@ -5,9 +5,7 @@ import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.stereotype.Component;
 
 import cl.duoc.lmsellms.controllers.DescuentoRESTControllerV2;
-import cl.duoc.lmsellms.controllers.VentaRESTControllerV2;
 import cl.duoc.lmsellms.dtos.DescuentoResponseDTO;
-import cl.duoc.lmsellms.dtos.VentaResponseDTO;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
@@ -15,10 +13,11 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 public class DescuentoModelAssemblers implements RepresentationModelAssembler<DescuentoResponseDTO, EntityModel<DescuentoResponseDTO>>{
     
     @Override
-    public EntityModel<DescuentoResponseDTO> toModel(DescuentoResponseDTO Descuento) {
-        return EntityModel.of(Descuento,
-                linkTo(methodOn(VentaRESTControllerV2.class).findById(Descuento.getId())).withSelfRel(),
-                linkTo(methodOn(VentaRESTControllerV2.class).findAll()).withRel("Descuento")
+    public EntityModel<DescuentoResponseDTO> toModel(DescuentoResponseDTO descuento) {
+        return EntityModel.of(descuento,
+                // Corregido: Ahora apunta a DescuentoRESTControllerV2
+                linkTo(methodOn(DescuentoRESTControllerV2.class).findById(descuento.getId())).withSelfRel(),
+                linkTo(methodOn(DescuentoRESTControllerV2.class).findAll()).withRel("descuentos")
         );
     }
 }
